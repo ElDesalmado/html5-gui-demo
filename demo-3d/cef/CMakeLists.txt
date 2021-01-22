@@ -26,3 +26,6 @@ if (CEF_CMAKE_OS_POSIX)
 endif()
 
 set_target_properties(cef-3d-async PROPERTIES FOLDER "demos\\demo-3d")
+
+
+add_dependencies(cef-3d-async HtmlCopyTarget)

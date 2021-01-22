@@ -48,4 +48,6 @@ if(NOT HTML_5_DEMO_CLI_ONLY)
     endif()
 
     set_target_properties(fs-cef PROPERTIES FOLDER "demos\\fs-browser")
+
+    add_dependencies(fs-cef HtmlCopyTarget)
 endif()

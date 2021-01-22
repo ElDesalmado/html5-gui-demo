@@ -53,3 +53,11 @@ if(NOT HTML_5_DEMO_CLI_ONLY)
     add_subdirectory(demo-3d)
 endif()
 add_subdirectory(fs-browser)
+
+add_custom_target(HtmlCopyTarget ALL)
+
+add_custom_command(TARGET HtmlCopyTarget
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/html
+        ${CMAKE_BINARY_DIR}/bin/html)
+

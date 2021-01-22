@@ -20,3 +20,5 @@ if (CEF_CMAKE_OS_POSIX)
 endif()
 
 set_target_properties(cef-async PROPERTIES FOLDER "demos")
+
+add_dependencies(cef-async HtmlCopyTarget)

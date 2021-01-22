@@ -21,3 +21,4 @@ endif()
 
 set_target_properties(cef-sync PROPERTIES FOLDER "demos")
 
+add_dependencies(cef-sync HtmlCopyTarget)
