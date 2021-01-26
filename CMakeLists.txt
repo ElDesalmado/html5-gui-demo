@@ -51,6 +51,7 @@ if(NOT HTML_5_DEMO_CLI_ONLY)
     add_subdirectory(cef-sync)
     add_subdirectory(cef-async)
     add_subdirectory(demo-3d)
+    add_subdirectory(c60-test)
 endif()
 add_subdirectory(fs-browser)
 
