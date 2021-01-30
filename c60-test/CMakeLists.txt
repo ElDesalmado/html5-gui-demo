@@ -21,3 +21,5 @@ if (CEF_CMAKE_OS_POSIX)
         LINK_FLAGS "-Wl,-rpath,.:$ORIGIN"
     )
 endif()
+
+add_dependencies(c60-test HtmlCopyTarget)

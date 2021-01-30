@@ -5,6 +5,9 @@
 #include "c60-test_simple_handler.h"
 
 #include <sstream>
+#include <array>
+#include <future>
+#include <iostream>
 
 #include "include/base/cef_bind.h"
 #include "include/cef_app.h"
@@ -33,6 +36,8 @@ SimpleHandler* SimpleHandler::GetInstance()
 void SimpleHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
 {
     CEF_REQUIRE_UI_THREAD();
+
+    std::cout << "SimpleHandler::OnAfterCreated" << std::endl;
 
     // Add to the list of existing browsers.
     browser_list_.push_back(browser);
@@ -95,3 +100,7 @@ void SimpleHandler::CloseAllBrowsers(bool force_close)
     for (; it != browser_list_.end(); ++it)
         (*it)->GetHost()->CloseBrowser(force_close);
 }
+
+
+
+

@@ -32,7 +32,8 @@ int main(int argc, char* argv[])
     // CEF applications have multiple sub-processes (render, plugin, GPU, etc)
     // that share the same executable. This function checks the command-line and,
     // if this is a sub-process, executes the appropriate logic.
-    int exit_code = CefExecuteProcess(main_args, nullptr, nullptr);
+    CefRefPtr<SimpleApp> app(new SimpleApp);
+    int exit_code = CefExecuteProcess(main_args, app, nullptr);
     if (exit_code >= 0)
     {
         // The sub-process has completed so return here.
@@ -47,10 +48,9 @@ int main(int argc, char* argv[])
     // SimpleApp implements application-level callbacks for the browser process.
     // It will create the first browser instance in OnContextInitialized() after
     // CEF has initialized.
-    CefRefPtr<SimpleApp> app(new SimpleApp);
 
     // Initialize CEF.
-    CefInitialize(main_args, settings, app.get(), nullptr);
+    CefInitialize(main_args, settings, app, nullptr);
 
     // Run the CEF message loop. This will block until CefQuitMessageLoop() is
     // called.
