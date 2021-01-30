@@ -119,8 +119,8 @@ public:
     {
         CEF_REQUIRE_RENDERER_THREAD()
 
-        std::cout << "DrawTask context/callaback: " << m_context.get()
-                  << " " << m_callbackDrawFunc.get() << std::endl;
+//        std::cout << "DrawTask context/callaback: " << m_context.get()
+//                  << " " << m_callbackDrawFunc.get() << std::endl;
 
         m_context->Enter();
 
@@ -199,7 +199,7 @@ public:
 
         if (name == "JsDraws")
         {
-            std::cout << "JsDraws" << std::endl;
+            //std::cout << "JsDraws" << std::endl;
             m_jsDraws = arguments[0]->GetBoolValue();
             return true;
         }
@@ -208,22 +208,17 @@ public:
         return false;
     }
 
-    void Draw()
+    bool Draw()
     {
-        if (m_drawTask != nullptr && !m_jsDraws)
+        if (!m_jsDraws)
         {
-            //std::cout << "Draw" << std::endl;
-            CefPostTask(TID_RENDERER, m_drawTask);
-        }
-    }
-
-    bool Swap()
-    {
-        if (m_swapTask != nullptr && !m_jsDraws)
-        {
-            //std::cout << "Swap" << std::endl;
-            CefPostTask(TID_RENDERER, m_swapTask);
-            return true;
+            if (m_drawTask != nullptr && m_swapTask != nullptr)
+            {
+                m_jsDraws = true;
+                CefPostTask(TID_RENDERER, m_swapTask);
+                CefPostTask(TID_RENDERER, m_drawTask);
+                return true;
+            }
         }
         return false;
     }
@@ -252,14 +247,12 @@ public:
 void DoAsyncUpdate(uint8_t *firstSharedArray, uint8_t *secondSharedArray,
                    size_t sharedArraySize, uint8_t increment, CefRefPtr<CefV8Handler> handler)
 {
-    uint8_t* arrayToUpdate = secondSharedArray;
+    uint8_t* arrayToUpdate = firstSharedArray;
     DrawHandler* drawHandler = static_cast<DrawHandler*>(handler.get());
     uint8_t prevColor = arrayToUpdate[0];
-    bool updateBuffer = true;
-    while(true) {
-        drawHandler->Draw();
-
-        if (updateBuffer)
+    while(true)
+    {
+        if (drawHandler->Draw())
         {
             uint8_t newColor = prevColor + increment;
 
@@ -274,7 +267,6 @@ void DoAsyncUpdate(uint8_t *firstSharedArray, uint8_t *secondSharedArray,
                             firstSharedArray : secondSharedArray;
         }
 
-        updateBuffer = drawHandler->Swap();
     }
 }
 
@@ -288,7 +280,7 @@ void SimpleApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFra
     CefRefPtr<CefV8Value> object = context->GetGlobal();
 
     // Create a new V8 string value. See the "Basic JS Types" section below.
-    size_t pixelArraySize = 100 * 100 * 4;
+    size_t pixelArraySize = 800 * 600 * 4;
     uint8_t* pixelArray0 = new uint8_t[pixelArraySize];
     for(size_t i = 0; i < pixelArraySize / 4; ++i)
     {
@@ -299,6 +291,13 @@ void SimpleApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFra
     }
 
     uint8_t* pixelArray1 = new uint8_t[pixelArraySize];
+//    for(size_t i = 0; i < pixelArraySize / 4; ++i)
+//    {
+//        pixelArray1[i * 4 + 0] = 0;
+//        pixelArray1[i * 4 + 1] = 255;
+//        pixelArray1[i * 4 + 2] = 0;
+//        pixelArray1[i * 4 + 3] = 255;
+//    }
     std::copy(pixelArray0, (pixelArray0 + pixelArraySize), pixelArray1);
 
     CefRefPtr<CefV8Value> sharedArray0 = CefV8Value::CreateArrayBuffer(pixelArray0, pixelArraySize, new MyRelease);

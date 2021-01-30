@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<head>
+<title>Shared buffer test</title>
+    <style>
+        html, body {
+            width:  100%;
+            height: 100%;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div><canvas id="image" width="800" height="600" /></div>
+    <script>
+
+        function putImageData(ctx, pixels, height, width)
+        {
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    var pos = y * width + x;
+                    ctx.fillStyle = 'rgba(' + pixels[pos*4+0]
+                        + ',' + pixels[pos*4+1]
+                        + ',' + pixels[pos*4+2]
+                        + ',' + (pixels[pos*4+3]/255) + ')';
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+        }
+
+        var canvas = document.getElementById('image');
+        var ctx = canvas.getContext('2d');
+
+        ctx.canvas.width  = window.innerWidth;
+        ctx.canvas.height = window.innerHeight;
+
+        var usingSA0 = true;
+        var pixels = new Uint8ClampedArray(window.sharedArray0);
+
+        function Swap()
+        {
+            //console.log("JS start swap");
+            if (!usingSA0)
+            {
+                pixels = new Uint8ClampedArray(window.sharedArray0);
+                usingSA0 = true;
+            }
+            else
+            {
+                pixels = new Uint8ClampedArray(window.sharedArray1);
+                usingSA0 = false;
+            }
+            //console.log("JS stop swap");
+        }
+
+        function Draw()
+        {
+            //console.log("Next window.DrawCompleted()")
+            //window.JsDraws(true);
+
+            //console.log("JS start draw");
+
+            //putImageData(ctx, pixels, 800, 600);
+            var copyPixels = new Uint8ClampedArray(pixels);
+            var imgData = new ImageData(copyPixels, canvas.width, canvas.height);
+            ctx.putImageData(imgData, 0, 0);
+
+            //console.log("JS stop draw");
+            // var image = new ImageData(pixels, 100, 100);
+            // ctx.putImageData(image);
+
+            window.JsDraws(false);
+        }
+
+        window.RegSwapBuffers(Swap);
+        window.RegDrawFunction(Draw);
+        //
+        // console.log(pixels);
+        // console.log(pixels.byteLength);
+        // console.log(pixels[0], pixels[1], pixels[2], pixels[3]);
+        //
+        // var arrbuf = new ArrayBuffer(100 * 100 * 4);
+        // var buf8 = new Uint8ClampedArray(arrbuf);
+        // console.log(buf8.byteLength);
+        // buf8.fill(100);
+        // for (i = 0; i < pixels.length; i++) {
+        // buf8[i] = pixels[i];
+        // }
+        //
+        // console.log(buf8[0]);
+        // buf8[0] = 0;
+        // console.log(buf8[0]);
+        //
+        // var buf8_1 = new Uint8ClampedArray(arrbuf);
+        // console.log(buf8_1[0]);
+
+        //console.log(pixels.length);
+        // for (let i = 0; i < pixels.length; i ++)
+        // {
+        //     console.log(pixels[i]);
+        // }
+
+        //var redImage = new ImageData(pixels, 100, 100);
+
+
+        //for (let i = 0; i < redImage.data.length; i += 4)
+        //{
+        //  redImage.data[i + 0] = pixels[i + 0];        // R value
+        //  redImage.data[i + 1] = pixels[i + 1];        // G value
+        //  redImage.data[i + 2] = pixels[i + 2];        // B value
+        //  redImage.data[i + 3] = pixels[i + 3];        // A value
+        //}
+        //putImageData(redImage, 0, 0);
+</script>
+</body>
