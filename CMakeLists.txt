@@ -46,14 +46,14 @@ if(NOT HTML_5_DEMO_CLI_ONLY)
 endif()
 
 add_subdirectory(helper_lib)
-add_subdirectory(ws-simple)
+# add_subdirectory(ws-simple) # uses boost
+# add_subdirectory(fs-browser) # uses boost
 if(NOT HTML_5_DEMO_CLI_ONLY)
     add_subdirectory(cef-sync)
     add_subdirectory(cef-async)
     add_subdirectory(demo-3d)
     add_subdirectory(c60-test)
 endif()
-add_subdirectory(fs-browser)
 
 add_custom_target(HtmlCopyTarget ALL)
 

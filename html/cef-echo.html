@@ -6,6 +6,18 @@
 var output;
 var ws;
 
+if (Module === undefined) {
+    var Module = {
+
+        setReceiveFunc(onReceive) {
+            console.log("setReceiveFunc: not connected to native client")
+        },
+        echo(message) {
+            console.log("echo: not connected to native client")
+        }
+    }
+}
+
 function init() {
     output = document.getElementById("output");
     Module.setReceiveFunc(onReceive);
