@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
     // CEF applications have multiple sub-processes (render, plugin, GPU, etc)
     // that share the same executable. This function checks the command-line and,
     // if this is a sub-process, executes the appropriate logic.
-    CefRefPtr<SimpleApp> app(new SimpleApp);
+    CefRefPtr<SimpleApp> app(new SimpleApp(argv[0]));
     int exit_code = CefExecuteProcess(main_args, app, nullptr);
     if (exit_code >= 0)
     {
