@@ -99,7 +99,7 @@ void SimpleApp::OnContextInitialized()
 //    CefWindow::CreateTopLevelWindow(new SimpleWindowDelegate<0, 0>(browser_view));
 
     CefRefPtr<CefBrowserView> browser_view_ = CefBrowserView::CreateBrowserView(
-            handler, "file:///C:/dev/repos/PatriarchSergei/html5-gui-demo/html/shared-buffer-test.html",
+            handler, std::string("file:///" + relativePath_ + "html/shared-buffer-test.html"),
             browser_settings, nullptr, nullptr,
             new SimpleBrowserViewDelegate());
 
@@ -319,7 +319,7 @@ void SimpleApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFra
     CefRefPtr<CefV8Value> jsDraws = CefV8Value::CreateFunction("JsDraws", handler);
     object->SetValue("JsDraws", jsDraws, V8_PROPERTY_ATTRIBUTE_NONE);
 
-    m_future = std::async(std::launch::async, DoAsyncUpdate,
+    m_future_ = std::async(std::launch::async, DoAsyncUpdate,
                           pixelArray0, pixelArray1,
                           pixelArraySize, 1, handler);
 }
