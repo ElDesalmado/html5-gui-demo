@@ -12,6 +12,10 @@
 // #define CEF_USE_SANDBOX 1
 
 #if defined(CEF_X11) && !defined(_WIN32)
+#include <X11/Xlib.h>
+#endif
+
+#if defined(CEF_X11) && !defined(_WIN32)
 namespace {
 
 int XErrorHandlerImpl(Display* display, XErrorEvent* event) {
