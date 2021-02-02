@@ -19,7 +19,11 @@ public:
         : relativePath_(relativePath)
     {
         // TODO: remove .exe part in relative path
+#if defined(_WIN32)
         auto lastSlash = relativePath_.rfind('\\');
+#else
+        auto lastSlash = relativePath_.rfind('/');
+#endif
         assert(lastSlash != std::string::npos && "Failed to find last slash");
         relativePath_ = relativePath_.substr(0, lastSlash + 1);
     }
