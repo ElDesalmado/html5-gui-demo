@@ -2,10 +2,7 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-#include <windows.h>
-
 #include "include/cef_command_line.h"
-#include "include/cef_sandbox_win.h"
 #include "c60-test_simple_app.h"
 
 // When generating projects with CMake the CEF_USE_SANDBOX value will be defined
@@ -14,25 +11,48 @@
 // Uncomment this line to manually enable sandbox support.
 // #define CEF_USE_SANDBOX 1
 
-#if defined(CEF_USE_SANDBOX)
-// The cef_sandbox.lib static library may not link successfully with all VS
-// versions.
-#pragma comment(lib, "cef_sandbox.lib")
-#endif
+#if defined(CEF_X11) && !defined(_WIN32)
+namespace {
+
+int XErrorHandlerImpl(Display* display, XErrorEvent* event) {
+  LOG(WARNING) << "X error received: "
+               << "type " << event->type << ", "
+               << "serial " << event->serial << ", "
+               << "error_code " << static_cast<int>(event->error_code) << ", "
+               << "request_code " << static_cast<int>(event->request_code)
+               << ", "
+               << "minor_code " << static_cast<int>(event->minor_code);
+  return 0;
+}
+
+int XIOErrorHandlerImpl(Display* display) {
+  return 0;
+}
+}  // namespace
+#endif  // defined(CEF_X11)
 
 // Entry point function for all processes.
 int main(int argc, char* argv[])
 {
+    CefRefPtr<CefCommandLine> commandLine = CefCommandLine::CreateCommandLine();
+#if defined(_WIN32)
     // Enable High-DPI support on Windows 7 or newer.
     CefEnableHighDPISupport();
-
-    // Provide CEF with command-line arguments.
     CefMainArgs main_args(GetModuleHandle(NULL));
+    commandLine->InitFromString(GetCommandLineW());
+#else
+    CefMainArgs main_args(argc, argv);
+    commandLine->InitFromArgv(argc, argv);
+#endif
+
+    // SimpleApp implements application-level callbacks for the browser process.
+    // It will create the first browser instance in OnContextInitialized() after
+    // CEF has initialized.
+    CefRefPtr<SimpleApp> app(new SimpleApp(argv[0]));
 
     // CEF applications have multiple sub-processes (render, plugin, GPU, etc)
     // that share the same executable. This function checks the command-line and,
     // if this is a sub-process, executes the appropriate logic.
-    CefRefPtr<SimpleApp> app(new SimpleApp(argv[0]));
     int exit_code = CefExecuteProcess(main_args, app, nullptr);
     if (exit_code >= 0)
     {
@@ -40,14 +60,16 @@ int main(int argc, char* argv[])
         return exit_code;
     }
 
+#if defined(CEF_X11) && !defined(_WIN32)
+    // Install xlib error handlers so that the application won't be terminated
+  // on non-fatal errors.
+  XSetErrorHandler(XErrorHandlerImpl);
+  XSetIOErrorHandler(XIOErrorHandlerImpl);
+#endif
     // Specify CEF global settings here.
     CefSettings settings;
 
     settings.no_sandbox = true;
-
-    // SimpleApp implements application-level callbacks for the browser process.
-    // It will create the first browser instance in OnContextInitialized() after
-    // CEF has initialized.
 
     // Initialize CEF.
     CefInitialize(main_args, settings, app, nullptr);
@@ -61,3 +83,5 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+
+
