@@ -15,12 +15,13 @@
 
 // When using the Views framework this object provides the delegate
 // implementation for the CefWindow that hosts the Views-based browser.
-template<int x, int y>
+
 class SimpleWindowDelegate : public CefWindowDelegate
 {
 public:
-    explicit SimpleWindowDelegate(CefRefPtr<CefBrowserView> browser_view)
-    :   browser_view_(browser_view)
+    explicit SimpleWindowDelegate(CefRefPtr<CefBrowserView> browser_view, CefRefPtr<CefDisplay> display = nullptr)
+    :   browser_view_(browser_view),
+        m_display(display)
     {}
 
     void OnWindowCreated(CefRefPtr<CefWindow> window) override
@@ -29,7 +30,7 @@ public:
         window->AddChildView(browser_view_);
         window->Show();
 
-        //window->SetFullscreen(true);
+        window->SetFullscreen(true);
     }
 
     void OnWindowDestroyed(CefRefPtr<CefWindow> window) override 
@@ -53,7 +54,9 @@ public:
 
     virtual CefRect GetInitialBounds(CefRefPtr<CefWindow> window) override
     {
-        return { x, y, 800, 600 };
+        if (m_display != nullptr)
+            return m_display->GetBounds();
+        else CefDisplay::GetPrimaryDisplay()->GetBounds();
     }
 
 private:
@@ -61,6 +64,8 @@ private:
 
     IMPLEMENT_REFCOUNTING(SimpleWindowDelegate);
     DISALLOW_COPY_AND_ASSIGN(SimpleWindowDelegate);
+
+    CefRefPtr<CefDisplay> m_display;
 };
 
 class SimpleBrowserViewDelegate : public CefBrowserViewDelegate
@@ -72,6 +77,43 @@ private:
     IMPLEMENT_REFCOUNTING(SimpleBrowserViewDelegate);
     DISALLOW_COPY_AND_ASSIGN(SimpleBrowserViewDelegate);
 };
+
+void SimpleApp::OnBeforeCommandLineProcessing(const CefString &process_type, CefRefPtr<CefCommandLine> command_line)
+{
+    std::vector<CefString> argv;
+    command_line->GetArgv(argv);
+    for(auto iter = argv.begin(); iter != argv.end(); ++iter)
+    {
+        if (iter->ToString() == "w1")
+        {
+            try
+            {
+                if (++iter == argv.end())
+                    continue;
+                w1_number = std::stoi(iter->ToString());
+            }
+            catch(std::exception& e)
+            {
+                std::cout << e.what() << std::endl;
+            }
+            continue;
+        }
+
+        if (iter->ToString() == "w2")
+        {
+            try
+            {
+                if (++iter == argv.end())
+                    continue;
+                w2_number = std::stoi(iter->ToString());
+            }
+            catch(std::exception& e)
+            {
+                std::cout << e.what() << std::endl;
+            }
+        }
+    }
+}
 
 void SimpleApp::OnContextInitialized()
 {
@@ -90,13 +132,20 @@ void SimpleApp::OnContextInitialized()
 
     std::string url = "http://www.google.com";
 
+    std::vector<CefRefPtr<CefDisplay>> displays;
+    CefDisplay::GetAllDisplays(displays);
+
     // Create the BrowserView.
-//    CefRefPtr<CefBrowserView> browser_view = CefBrowserView::CreateBrowserView(
-//            handler, url, browser_settings, nullptr, nullptr,
-//            new SimpleBrowserViewDelegate());
-//
-//    // Create the Window. It will show itself after creation.
-//    CefWindow::CreateTopLevelWindow(new SimpleWindowDelegate<0, 0>(browser_view));
+    CefRefPtr<CefBrowserView> browser_view = CefBrowserView::CreateBrowserView(
+            handler, url, browser_settings, nullptr, nullptr,
+            new SimpleBrowserViewDelegate());
+
+    // Create the Window. It will show itself after creation.
+
+    CefWindow::CreateTopLevelWindow(new SimpleWindowDelegate(browser_view,
+                                                             displays.size() <= w1_number ?
+                                                             CefDisplay::GetPrimaryDisplay() :
+                                                             displays[w1_number]));
 
     CefRefPtr<CefBrowserView> browser_view_ = CefBrowserView::CreateBrowserView(
             handler, std::string("file:///" + relativePath_ + "html/shared-buffer-test.html"),
@@ -104,7 +153,11 @@ void SimpleApp::OnContextInitialized()
             new SimpleBrowserViewDelegate());
 
     // Create the Window. It will show itself after creation.
-    CefWindow::CreateTopLevelWindow(new SimpleWindowDelegate<1600, 10>(browser_view_));
+
+    CefWindow::CreateTopLevelWindow(new SimpleWindowDelegate(browser_view_,
+                                                             displays.size() <= w2_number ?
+                                                             CefDisplay::GetPrimaryDisplay() :
+                                                             displays[w2_number]));
 }
 
 class DrawTask : public CefTask

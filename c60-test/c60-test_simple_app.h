@@ -27,6 +27,7 @@ public:
     // CefApp methods:
     virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override { return this; }
     virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override { return this; }
+    virtual void OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr<CefCommandLine> command_line) override;
 
     // CefBrowserProcessHandler methods:
     virtual void OnContextInitialized() override;
@@ -37,7 +38,8 @@ public:
                                   CefRefPtr<CefV8Context> context) override;
 
 private:
-
+    uint32_t w1_number,
+             w2_number;
     std::string relativePath_;
     std::future<void> m_future_{};
 
