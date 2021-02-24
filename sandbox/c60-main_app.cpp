@@ -45,9 +45,13 @@ public:
         return true;
     }
 
-    CefSize GetPreferredSize(CefRefPtr<CefView> view) override 
+    CefSize GetPreferredSize(CefRefPtr<CefView> view) override
     {
-        return CefSize(800, 600);
+        CefRect displayRect;
+        if (m_display != nullptr)
+            displayRect = m_display->GetBounds();
+        else displayRect = CefDisplay::GetPrimaryDisplay()->GetBounds();
+        return { displayRect.height, displayRect.width };
     }
 
     virtual CefRect GetInitialBounds(CefRefPtr<CefWindow> window) override
