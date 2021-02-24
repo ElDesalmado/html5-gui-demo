@@ -53,6 +53,7 @@ if(NOT HTML_5_DEMO_CLI_ONLY)
     add_subdirectory(cef-async)
     add_subdirectory(demo-3d)
     add_subdirectory(c60-test)
+    add_subdirectory(sandbox)
 endif()
 
 add_custom_target(HtmlCopyTarget ALL)
