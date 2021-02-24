@@ -12,10 +12,13 @@ class MainApp : public CefApp,
                 public CefBrowserProcessHandler
 {
 public:
-    MainApp(const char *relativePath, std::vector<std::string> urls = { "http://www.google.com" })
+    using WindowParams = std::vector<std::pair<std::string, uint32_t>>;
+
+public:
+    MainApp(const char *relativePath,
+            WindowParams urlsAndDisplayIndices = { { "http://www.google.com"  , 0 } })
     :   m_relativePath(relativePath),
-        m_urls(urls),
-        m_displayIndices(m_urls.size())
+        m_urlsAndDisplayIndices(urlsAndDisplayIndices)
     {
         // TODO: remove .exe part in relative path
         auto lastSlash = m_relativePath.rfind('\\');
@@ -39,8 +42,7 @@ private:
     void AddDisplayIndex(uint32_t windowIndex, uint32_t displayIndex);
 
 private:
-    std::vector<std::string> m_urls;
-    std::vector<uint32_t> m_displayIndices;
+    WindowParams m_urlsAndDisplayIndices;
     std::string m_relativePath;
 
     // Include the default reference counting implementation.

@@ -13,7 +13,6 @@
 
 // When using the Views framework this object provides the delegate
 // implementation for the CefWindow that hosts the Views-based browser.
-
 class FullscreenWindowDelegate : public CefWindowDelegate
 {
 public:
@@ -121,19 +120,19 @@ void MainApp::OnContextInitialized()
     std::vector<CefRefPtr<CefDisplay>> displays;
     CefDisplay::GetAllDisplays(displays);
 
-    for(size_t i = 0; i < m_urls.size(); ++i)
+    for(const auto& windowParams : m_urlsAndDisplayIndices)
     {
-        auto displayPtr = displays.size() > m_displayIndices[i] ?
-                          displays[m_displayIndices[i]] : nullptr;
-        CreateWindowOnDisplay(m_urls[i], displayPtr, handler, browser_settings);
+        auto displayPtr = displays.size() > windowParams.second ?
+                          displays[windowParams.second] : nullptr;
+        CreateWindowOnDisplay(windowParams.first, displayPtr, handler, browser_settings);
     }
 
 }
 
 void MainApp::AddDisplayIndex(uint32_t windowIndex, uint32_t displayIndex)
 {
-    if (m_urls.size() > windowIndex)
-        m_displayIndices[windowIndex] = displayIndex;
+    if (m_urlsAndDisplayIndices.size() > windowIndex)
+        m_urlsAndDisplayIndices[windowIndex].second = displayIndex;
 }
 
 void MainApp::CreateWindowOnDisplay(const std::string &url, CefRefPtr<CefDisplay> displayPtr,
