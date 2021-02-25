@@ -6,24 +6,19 @@
 
 #include <future>
 #include <string>
+#include <array>
 
 // Implement application-level callbacks for the browser process.
 class MainApp : public CefApp,
                 public CefBrowserProcessHandler
 {
 public:
-    using WindowParams = std::vector<std::pair<std::string, uint32_t>>;
+    static constexpr uint32_t WINDOW_COUNT = 2;
 
-public:
-    MainApp(const char *relativePath,
-            WindowParams urlsAndDisplayIndices = { { "http://www.google.com"  , 0 } })
-    :   m_relativePath(relativePath),
-        m_urlsAndDisplayIndices(urlsAndDisplayIndices)
+    MainApp(const std::array<std::string, WINDOW_COUNT>& urls)
+    :   m_urls(urls)
     {
-        // TODO: remove .exe part in relative path
-        auto lastSlash = m_relativePath.rfind('\\');
-        assert(lastSlash != std::string::npos && "Failed to find last slash");
-        m_relativePath = m_relativePath.substr(0, lastSlash + 1);
+
     }
 
     // CefApp methods:
@@ -42,8 +37,9 @@ private:
     void AddDisplayIndex(uint32_t windowIndex, uint32_t displayIndex);
 
 private:
-    WindowParams m_urlsAndDisplayIndices;
-    std::string m_relativePath;
+
+    std::array<std::string, WINDOW_COUNT> m_urls;
+    std::array<uint32_t, WINDOW_COUNT> m_displayNumber;
 
     // Include the default reference counting implementation.
     IMPLEMENT_REFCOUNTING(MainApp);

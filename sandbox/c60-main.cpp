@@ -32,10 +32,8 @@ int main(int argc, char* argv[])
     // MainApp implements application-level callbacks for the browser process.
     // It will create the first browser instance in OnContextInitialized() after
     // CEF has initialized.
-    MainApp::WindowParams windowParams{ { "http://www.google.com", 0 },
-                           { "http://www.yandex.ru", 0 } };
-
-    CefRefPtr<MainApp> app(new MainApp(argv[0], windowParams));
+    CefRefPtr<MainApp> app(new MainApp({ "http://192.168.165.114:8080/",
+                                         "" }));
     // CEF applications have multiple sub-processes (render, plugin, GPU, etc)
     // that share the same executable. This function checks the command-line and,
     // if this is a sub-process, executes the appropriate logic.

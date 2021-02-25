@@ -50,7 +50,7 @@ bool SimpleHandler::DoClose(CefRefPtr<CefBrowser> browser)
     // Closing the main window requires special handling. See the DoClose()
     // documentation in the CEF header for a detailed destription of this
     // process.
-//    if (browser_list_.size() == 1)
+//    if (m_browser_list.size() == 1)
 //    {
 //        // Set a flag to indicate that the window close should be allowed.
 //        is_closing_ = true;

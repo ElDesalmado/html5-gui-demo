@@ -6,6 +6,8 @@
 
 #include "include/views/cef_browser_view.h"
 #include "include/wrapper/cef_helpers.h"
+#include "include/cef_request_context_handler.h"
+#include "include/cef_cookie.h"
 
 #include <string>
 #include <future>
@@ -28,7 +30,7 @@ public:
         window->AddChildView(m_browser_view);
         window->Show();
 
-        //window->SetFullscreen(true);
+        window->SetFullscreen(true);
     }
 
     void OnWindowDestroyed(CefRefPtr<CefWindow> window) override 
@@ -70,6 +72,8 @@ private:
     IMPLEMENT_REFCOUNTING(FullscreenBrowserViewDelegate);
     DISALLOW_COPY_AND_ASSIGN(FullscreenBrowserViewDelegate);
 };
+
+constexpr uint32_t MainApp::WINDOW_COUNT;
 
 void MainApp::OnBeforeCommandLineProcessing(const CefString &process_type, CefRefPtr<CefCommandLine> command_line)
 {
@@ -115,24 +119,26 @@ void MainApp::OnContextInitialized()
     std::vector<CefRefPtr<CefDisplay>> displays;
     CefDisplay::GetAllDisplays(displays);
 
-    for(const auto& windowParams : m_urlsAndDisplayIndices)
+    for(size_t i = 0; i < WINDOW_COUNT; ++i)
     {
-        auto displayPtr = displays.size() > windowParams.second ?
-                          displays[windowParams.second] : nullptr;
-        CreateWindowOnDisplay(windowParams.first, displayPtr, handler, browser_settings);
+        auto displayNumber = m_displayNumber[i];
+        auto displayPtr = displays.size() > displayNumber ?
+                          displays[displayNumber] : nullptr;
+        CreateWindowOnDisplay(m_urls[i], displayPtr, handler, browser_settings);
     }
-
 }
 
 void MainApp::AddDisplayIndex(uint32_t windowIndex, uint32_t displayIndex)
 {
-    if (m_urlsAndDisplayIndices.size() > windowIndex)
-        m_urlsAndDisplayIndices[windowIndex].second = displayIndex;
+    if (WINDOW_COUNT > windowIndex)
+        m_displayNumber[windowIndex] = displayIndex;
 }
 
 void MainApp::CreateWindowOnDisplay(const std::string &url, CefRefPtr<CefDisplay> displayPtr,
                                     CefRefPtr<BrowserManager> handler, const CefBrowserSettings& settings)
 {
+    // static MyCefRequestContext staticContex{};
+
     // Create the BrowserView.
     CefRefPtr<CefBrowserView> browser_view = CefBrowserView::CreateBrowserView(
             handler, url, settings, nullptr, nullptr,
